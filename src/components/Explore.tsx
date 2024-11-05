@@ -6,13 +6,15 @@ import Image from "next/image";
 import img2 from './../../public/img-2.svg';
 import x from './../assets/x (1).svg';
 import sp2 from './../../public/sp-2.svg'
+import heart from './../assets/heart (1).svg';
 
 export default function Explore() {
     const [perfumes, setPerfumes] = useState([]);
+    const userId = localStorage.getItem('token'); 
     useEffect(() => {
         const fetchPerfumes = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/perfume/view'); // Adjust the URL if necessary
+                const response = await fetch('http://localhost:5000/api/perfume/view'); 
                 const data = await response.json();
                 setPerfumes(data);
             } catch (error) {
@@ -22,6 +24,27 @@ export default function Explore() {
 
         fetchPerfumes();
     }, []);
+    const addToCart = async (perfumeId) => {
+        try {
+            const response = await fetch('http://localhost:5000/api/cart/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ userId, perfumeId })
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                alert('Item added to cart successfully!');
+            } else {
+                console.error(result.error);
+                alert('Error adding item to cart');
+            }
+        } catch (error) {
+            console.error('Error adding item to cart:', error);
+        }
+    };
     return (
         <div >
             {/* expolre block  */}
@@ -209,19 +232,24 @@ export default function Explore() {
                                        
                                     </div>
                                     <div className={styles.heart_wrapper}>
-                                        <img src="../img/heart.svg" alt="Heart" className={styles.heart_image} />
+                                        <Image src={heart} alt="heart"className={styles.heart_image}></Image>
+                                        
                                     </div>
                                     <div className={styles.badge_wrapper}>
-                                        <img src="../img/badge.svg" alt="Badge" className={styles.badge_wrapper} />
+                                        {/* <Image src={badge} alt="badge" className={styles.badge_wrapper}></Image> */}
+                                        
                                     </div>
                                 </div>
 
                                 <div className={styles.details_block}>
                                     <div className={styles.head_1}>{perfume.name}</div>
                                     <p className={styles.price}>{perfume.price}</p>
-                                    <a href="../cart/cart.html">
-                                        <button className={styles.buy_button}>Add to Cart</button>
-                                    </a>
+                                    <button
+                                        className={styles.buy_button}
+                                        onClick={() => addToCart(perfume._id)}
+                                    >
+                                        Add to Cart
+                                    </button>
                                 </div>
                             </div>
                         ))}
